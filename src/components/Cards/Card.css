@@ -14,6 +14,7 @@
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+  cursor: pointer; /* Indica interatividade */
 }
 
 /* Accent line on top of each card */
@@ -32,6 +33,11 @@
   transform: translateY(-8px);
   box-shadow: var(--shadow-xl), 0 0 0 1px var(--accent-border);
   border-color: var(--accent-border);
+}
+
+.card:active {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .card h3 {

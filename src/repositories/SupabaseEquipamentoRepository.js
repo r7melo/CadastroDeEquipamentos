@@ -7,7 +7,7 @@ import { supabase } from "../supabaseClient";
 export class SupabaseEquipamentoRepository extends IEquipamentoRepository {
   /**
    * Busca todos os registros da tabela 'equipamentos' ordenados por data de criação.
-   * @returns {Promise<Array<{id?: number, nome: string, setor: number}>>}
+   * @returns {Promise<Array<{id: number, nome: string, setor: number}>>}
    */
   async getAll() {
     if (!supabase) {
@@ -47,6 +47,52 @@ export class SupabaseEquipamentoRepository extends IEquipamentoRepository {
 
     if (error) {
       console.error("Erro ao inserir dados no Supabase:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Atualiza um equipamento existente no Supabase pelo ID.
+   * @param {number|string} id
+   * @param {{nome: string, setor: string|number}} equipamento
+   * @returns {Promise<void>}
+   */
+  async update(id, equipamento) {
+    if (!supabase) {
+      throw new Error("Supabase não está configurado. Adicione credenciais válidas no arquivo .env.");
+    }
+
+    const { error } = await supabase
+      .from('equipamentos')
+      .update({
+        nome: equipamento.nome,
+        setor: Number(equipamento.setor)
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erro ao atualizar dados no Supabase:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Exclui um equipamento do Supabase pelo ID.
+   * @param {number|string} id
+   * @returns {Promise<void>}
+   */
+  async delete(id) {
+    if (!supabase) {
+      throw new Error("Supabase não está configurado. Adicione credenciais válidas no arquivo .env.");
+    }
+
+    const { error } = await supabase
+      .from('equipamentos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erro ao excluir dados no Supabase:", error);
       throw error;
     }
   }
