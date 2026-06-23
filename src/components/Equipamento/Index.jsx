@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { equipamentoRepository } from '../../repositories';
 
 export default function Equipamento({onSave}) {
 
@@ -14,20 +15,22 @@ export default function Equipamento({onSave}) {
     });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    const listaEquipamentos = JSON.parse(localStorage.getItem('equipamentos')) || [];
-    listaEquipamentos.push(equipamento);
+    try {
+      await equipamentoRepository.create(equipamento);
 
-    localStorage.setItem('equipamentos', JSON.stringify(listaEquipamentos));
+      setEquipamento({
+        nome: '',
+        setor: '',
+      });
 
-    setEquipamento({
-      nome: '',
-      setor: '',
-    });
-
-    onSave();
+      onSave();
+    } catch (err) {
+      console.error("Erro ao salvar equipamento:", err);
+      alert("Erro ao salvar equipamento.");
+    }
   }
 
   return (
