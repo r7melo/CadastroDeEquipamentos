@@ -1,96 +1,92 @@
 # Cadastro de Equipamentos
 
-Este projeto é uma aplicação web simples desenvolvida em **React** e **Vite** para o cadastro e listagem de equipamentos organizados por setores. A aplicação utiliza o **LocalStorage** do navegador para persistir os dados localmente de forma simples e rápida.
+Este é um sistema completo de gerenciamento (CRUD) de equipamentos organizado por setores, desenvolvido em **React** e **Vite**. O projeto foi estruturado seguindo boas práticas de desenvolvimento, incluindo os **Princípios SOLID** e o padrão **Repository (ORM no Frontend)**, permitindo alternar a persistência de dados de forma transparente.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-O projeto foi construído utilizando as seguintes tecnologias e dependências principais:
+O projeto foi construído com as seguintes tecnologias e dependências principais:
 
-*   **[React 19](https://react.dev/)**: Biblioteca JavaScript para construção de interfaces de usuário.
-*   **[Vite 8](https://vite.dev/)**: Ferramenta de build rápida e moderna para o ecossistema frontend.
-*   **[React Router Dom 7](https://reactrouter.com/)**: Biblioteca para gerenciamento de rotas e navegação na aplicação.
-*   **[Bootstrap 5.3](https://getbootstrap.com/) & [React-Bootstrap](https://react-bootstrap.netlify.app/)**: Bibliotecas de estilos CSS para estruturação de componentes e layouts responsivos.
-*   **LocalStorage API**: API nativa do navegador para persistência de dados sem necessidade de um banco de dados externo no momento.
+*   **[React 19](https://react.dev/)**: Biblioteca para construção de interfaces SPA.
+*   **[Vite 8](https://vite.dev/)**: Ferramenta de build ultra rápida para o frontend.
+*   **[Supabase JS Client SDK](https://supabase.com/docs/reference/javascript/introduction)**: Cliente para integração em tempo real com o banco de dados na nuvem.
+*   **Bootstrap 5.3 & React-Bootstrap**: Framework CSS utilizado para futura estilização responsiva.
+*   **LocalStorage API**: Utilizada para armazenamento local em modo offline.
+
+---
+
+## 🏗️ Arquitetura e Princípios SOLID
+
+O projeto aplica padrões arquiteturais para garantir um código limpo, testável e manutenível:
+*   **Padrão Repository (Camada ORM)**: Cria uma abstração entre a interface visual do usuário (React) e a fonte de dados (banco de dados). 
+*   **Princípio de Inversão de Dependências (D do SOLID)**: Os componentes gráficos dependem de um contrato abstrato (`IEquipamentoRepository`) em vez de se acoplarem diretamente ao LocalStorage ou ao Supabase.
+*   **Fábrica (Factory)**: A classe `repositories/index.js` instancia dinamicamente o repositório correto baseado no arquivo de configuração `.env`.
 
 ---
 
 ## 📁 Estrutura de Pastas e Arquivos
 
-Abaixo está detalhada a organização do diretório `src` do projeto:
-
 ```text
-src/
-├── assets/                  # Arquivos de mídia estática (ex: imagens, logos)
-├── components/              # Componentes reutilizáveis do sistema
-│   ├── Cards/               # Componente visual para exibir cada equipamento cadastrado
-│   │   ├── Card.css         # Estilização local do card
-│   │   └── Index.jsx        # Estrutura do card
-│   ├── Equipamento/         # Formulário para cadastro de novos equipamentos
-│   │   └── Index.jsx        # Formulário com manipulação de estado (inputs de Nome e Setor)
-│   └── ListaEquipamentos/   # Componente responsável por ler do LocalStorage e listar os cards
-│       └── Index.jsx        # Lógica de sincronização com o estado do LocalStorage
-├── pages/                   # Páginas da aplicação
-│   ├── Home/                # Página principal (Dashboard)
-│   │   ├── Home.css         # Estilos da página Home
-│   │   └── Index.jsx        # Orquestra os componentes de cadastro e listagem
-│   └── Other/               # Pasta reservada para futuras páginas adicionais
-├── App.css                  # Estilos globais do App
-├── App.jsx                  # Componente base que encapsula a página Home
-├── index.css                # Estilização global do projeto
-├── main.jsx                 # Ponto de entrada que inicializa a aplicação no DOM
-└── routes.jsx               # Configuração inicial de rotas (rotas de Home, Sobre e Usuário)
+CadastroDeEquipamentos/
+├── database.sql             # Script SQL de criação de tabelas e políticas RLS no Supabase
+├── netlify.toml             # Configuração automática para hospedagem no Netlify
+├── .env                     # Variáveis de ambiente (credenciais de banco e provedores)
+└── src/
+    ├── components/
+    │   ├── Cards/           # Exibição visual de cada equipamento cadastrado (clicável)
+    │   ├── Equipamento/     # Formulário de cadastro de novos equipamentos
+    │   ├── EquipamentoModal/# Modal popup para visualizar, atualizar e excluir dados [CRUD]
+    │   └── ListaEquipamentos/# Listagem inteligente e conexão de estado dos componentes
+    ├── repositories/        # Camada de Dados (SOLID / ORM)
+    │   ├── IEquipamentoRepository.js  # Definição do contrato base
+    │   ├── LocalStorageEquipamentoRepository.js # Implementação local offline
+    │   ├── SupabaseEquipamentoRepository.js     # Implementação em nuvem online
+    │   └── index.js         # Factory Loader (Inversão de Dependência)
+    ├── supabaseClient.js    # Inicializador seguro da conexão do Supabase
+    ├── App.jsx              # Componente raiz do app
+    ├── index.css            # Estilização global com suporte automático a modo escuro
+    └── main.jsx             # Inicialização do DOM
 ```
 
 ---
 
-## ⚙️ Funcionalidades Atuais
+## ⚙️ Funcionalidades Atuais (CRUD Completo)
 
-1.  **Formulário de Cadastro (`Equipamento/Index.jsx`)**:
-    *   Permite ao usuário inserir o **Nome** (campo de texto) e o **Setor** (campo numérico).
-    *   Valida e submete os dados, adicionando-os a uma lista no LocalStorage sob a chave `'equipamentos'`.
-    *   Dispara um callback (`onSave`) para a página mãe notificar a lista de que um novo item foi adicionado.
-
-2.  **Lista de Equipamentos (`ListaEquipamentos/Index.jsx`)**:
-    *   Recupera a lista de equipamentos atualizada diretamente do `localStorage` sempre que a propriedade `reload` é alterada.
-    *   Mapeia cada item cadastrado e renderiza um componente `Card`.
-
-3.  **Exibição em Cards (`Cards/Index.jsx`)**:
-    *   Apresenta de forma clara o nome do equipamento e o número correspondente do setor de forma organizada.
+1.  **Criar (`Create`)**: O formulário permite cadastrar novos equipamentos definindo Nome e Setor, enviando-os para a fonte ativa de dados.
+2.  **Ler (`Read`)**: Listagem responsiva organizada em uma grade de cards interativos com efeitos dinâmicos ao passar o mouse.
+3.  **Atualizar (`Update`)**: Ao clicar em qualquer card, abre-se um modal popup com os dados pré-preenchidos para alteração rápida.
+4.  **Excluir (`Delete`)**: Opção no modal para deletar registros do banco de dados após uma janela de confirmação.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🚀 Como Configurar e Executar
 
-Siga os passos abaixo para baixar as dependências e iniciar o servidor local:
-
-### 1. Pré-requisitos
-*   [Node.js](https://nodejs.org/) instalado na sua máquina.
-
-### 2. Instalação das Dependências
-No terminal do seu projeto, execute:
+### 1. Clonagem e Instalação
+No terminal do projeto, instale as dependências:
 ```bash
 npm install
 ```
 
-> [!NOTE]
-> Se você receber um erro no PowerShell relacionado à política de execução de scripts (`PSSecurityException`), execute o seguinte comando no PowerShell como administrador ou no escopo do seu usuário para habilitar a execução de scripts locais:
-> ```powershell
-> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-> ```
+### 2. Configurando o Banco de Dados (Supabase)
+1. Crie um projeto gratuito em [supabase.com](https://supabase.com/).
+2. Copie o script contido em **[database.sql](file:///c:/Users/Romario%20Melo/Documents/CadastroDeEquipamentos/database.sql)** e execute-o no **SQL Editor** do painel do Supabase para gerar as tabelas e habilitar as permissões de acesso (RLS).
+3. Copie as chaves do seu projeto (**Project URL** e **anon public key**).
 
-### 3. Execução em Desenvolvimento
-Para rodar a aplicação em modo de desenvolvimento, use:
+### 3. Configurando as Variáveis de Ambiente
+Crie ou edite o arquivo **[.env](file:///c:/Users/Romario%20Melo/Documents/CadastroDeEquipamentos/.env)** na raiz do projeto:
+
+```env
+VITE_SUPABASE_URL=SUA_URL_DO_SUPABASE
+VITE_SUPABASE_ANON_KEY=SUA_CHAVE_ANON_DO_SUPABASE
+
+# Alternar fonte de dados: 'supabase' para banco online ou 'localstorage' para local offline
+VITE_DATA_SOURCE=supabase
+```
+
+### 4. Executando em Desenvolvimento
+Para rodar a aplicação localmente:
 ```bash
 npm run dev
 ```
-
-Abra o endereço exibido no terminal (geralmente `http://localhost:5173`) no seu navegador.
-
-### 4. Build de Produção
-Para compilar e otimizar a aplicação para publicação em produção:
-```bash
-npm run build
-```
-O build otimizado será gerado na pasta `dist/`.
+Acesse `http://localhost:5173` no seu navegador.
